@@ -1,36 +1,116 @@
 "use client";
 
 import Link from 'next/link';
-import { HiBars3 } from "react-icons/hi2";
-import { useState } from 'react';
+import { FaBars, FaRegWindowClose, FaGithub, FaTwitter } from "react-icons/fa"; 
+import { SiZenn } from "react-icons/si";
+import { useState, useEffect } from 'react';
+
+const sections = ["home", "about", "experience", "portfolio", "blog", "contact"];
+const socialLinks = [
+  { href: "https://github.com/yourusername", icon: <FaGithub /> },
+  { href: "https://twitter.com/yourusername", icon: <FaTwitter /> },
+  { href: "https://zenn.dev/yourusername", icon: <SiZenn /> },
+];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, targetId: string) => {
+    e.preventDefault();
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsOpen(false);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element && element.offsetTop <= scrollPosition && element.offsetTop + element.offsetHeight > scrollPosition) {
+          setActiveSection(section);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   return (
     <nav className="fixed w-full flex items-center justify-between bg-gray-800 p-6 z-50">
+      
       <div className="flex items-center">
         <Link href="/" className="text-white text-2xl font-bold">HomePage</Link>
       </div>
+      
       <div className="hidden md:flex flex-1 justify-center space-x-4">
-        <Link href="/" className="text-white hover:text-gray-500 mx-2 text-lg">◼︎Home</Link>
-        <Link href="/about" className="text-white hover:text-gray-500 mx-2 text-lg">◼︎About</Link>
-        <Link href="/experience" className="text-white hover:text-gray-500 mx-2 text-lg">◼︎Experience</Link>
-        <Link href="/portfolio" className="text-white hover:text-gray-500 mx-2 text-lg">◼︎Portfolio</Link>
-        <Link href="/blog" className="text-white hover:text-gray-500 mx-2 text-lg">◼︎Blog</Link>
-        <Link href="/contact" className="text-white hover:text-gray-500 mx-2 text-lg">◼︎Contact</Link>
+        {sections.map((section) => (
+          <a
+            key={section}
+            href={`#${section}`}
+            onClick={(e) => handleScroll(e, section)}
+            className={`text-lg mx-2 ${activeSection === section ? 'text-gray-500' : 'text-white hover:text-gray-500'}`}
+          >
+            ◼︎{section.charAt(0).toUpperCase() + section.slice(1)}
+          </a>
+        ))}
       </div>
+      
+      <div className="hidden md:flex space-x-4 hover:text-gray-500">
+        {socialLinks.map((link, index) => (
+          <a
+            key={index}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-gray-500 text-lg"
+          >
+            {link.icon}
+          </a>
+        ))}
+      </div>
+      
       <div className="md:hidden">
-        <HiBars3 size={30} color='white' onClick={() => setIsOpen(!isOpen)} />
+        {isOpen ? (
+          <FaRegWindowClose size={30} color='white' onClick={() => setIsOpen(!isOpen)} className="hover:text-gray-500 transition-colors duration-300" />
+        ) : (
+          <FaBars size={30} color='white' onClick={() => setIsOpen(!isOpen)} className="hover:text-gray-500 transition-colors duration-300" />
+        )}
       </div>
+      
       {isOpen && (
-        <div className="absolute top-16 left-0 w-full bg-gray-800 flex flex-col items-center space-y-4 md:hidden">
-          <Link href="/" className="text-white hover:text-gray-500 text-lg">◼︎Home</Link>
-          <Link href="/about" className="text-white hover:text-gray-500 text-lg">◼︎About</Link>
-          <Link href="/experience" className="text-white hover:text-gray-500 text-lg">◼︎Experience</Link>
-          <Link href="/portfolio" className="text-white hover:text-gray-500 text-lg">◼︎Portfolio</Link>
-          <Link href="/blog" className="text-white hover:text-gray-500 text-lg">◼︎Blog</Link>
-          <Link href="/contact" className="text-white hover:text-gray-500 text-lg">◼︎Contact</Link>
+        <div className="absolute top-16 left-0 w-full bg-gray-800 flex flex-col items-center space-y-4 md:hidden pb-4 transition-all duration-300">
+          {sections.map((section) => (
+            <a
+              key={section}
+              href={`#${section}`}
+              onClick={(e) => handleScroll(e, section)}
+              className={`text-lg ${activeSection === section ? 'text-gray-500' : 'text-white hover:text-gray-500'}`}
+            >
+              ◼︎{section.charAt(0).toUpperCase() + section.slice(1)}
+            </a>
+          ))}
+          <div className="flex space-x-4">
+            {socialLinks.map((link, index) => (
+              <a
+                key={index}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-gray-500 text-lg"
+              >
+                {link.icon}
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </nav>
